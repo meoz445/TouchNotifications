@@ -90,8 +90,8 @@ if ((self = [super init]) != NULL)
 	{
 	styleClassNamesByName = [[NSMutableDictionary alloc] init];
 	styleOptionsByName = [[NSMutableDictionary alloc] init];
-	displayDelay = 0.25;
-	minimumDisplayTime = 2.0;
+	displayDelay = 0.2;
+	minimumDisplayTime = 1.0;
 
 	notificationStates = [[NSMutableArray alloc] init];
 
@@ -204,7 +204,7 @@ return(theNotificationStyle);
 
 	CUserNotificationState *theState = [[[CUserNotificationState alloc] init] autorelease];
 	theState.notification = inNotification;
-	theState.requestedShowDate = theState.created;
+	theState.requestedShowDate = theState.created + self.displayDelay;
 	[self.notificationStates addObject:theState];
 	}
 [self nextNotification];
@@ -212,11 +212,9 @@ return(theNotificationStyle);
 
 - (void)dequeueNotification:(CUserNotification *)inNotification
 {
-@synchronized(self)
-	{
-	CUserNotificationState *theState = [[self.notificationStates filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"notification == %@", inNotification]] lastObject];
-	theState.requestedHideDate = CFAbsoluteTimeGetCurrent();
-	}
+CUserNotificationState *theState = [[self.notificationStates filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"notification == %@", inNotification]] lastObject];
+theState.requestedHideDate = theState.showDate + self.minimumDisplayTime;
+
 [self nextNotification];
 }
 
@@ -224,25 +222,20 @@ return(theNotificationStyle);
 
 - (void)dequeueNotificationForIdentifier:(NSString *)inIdentifier;
 {
-@synchronized(self)
-	{
-	CUserNotificationState *theState = [[self.notificationStates filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"notification.identifier == %@", inIdentifier]] lastObject];
-	if (theState == NULL)
-		{
-		NSLog(@"Did not find notification for identifier: %@", inIdentifier);
-		}
-	theState.requestedHideDate = theState.requestedShowDate + self.minimumDisplayTime;
-	}
+CUserNotificationState *theState = [[self.notificationStates filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"notification.identifier == %@", inIdentifier]] lastObject];
+if (theState == NULL)
+    {
+    NSLog(@"Did not find notification for identifier: %@", inIdentifier);
+    }
+theState.requestedHideDate = theState.requestedShowDate + self.minimumDisplayTime;
+
 [self nextNotification];
 }
 
 - (void)dequeueCurrentNotification
 {
-@synchronized(self)
-	{
-	if (self.currentNotificationState)
-		[self dequeueNotification:self.currentNotificationState.notification];
-	}
+if (self.currentNotificationState)
+    [self dequeueNotification:self.currentNotificationState.notification];
 }
 
 #pragma mark -
@@ -267,16 +260,9 @@ return notificationExists;
 
 - (void)nextNotification
 {
-if (self.notificationStates.count <= 0)
-	{
-	[self nextTimer];
-	return;
-	}
-
 if ([NSThread isMainThread] == NO)
 	{
-	NSInvocation *theInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:_cmd]];
-	[theInvocation performSelectorOnMainThread:@selector(invoke) withObject:NULL waitUntilDone:YES];
+    [self performSelectorOnMainThread:@selector(nextNotification) withObject:NULL waitUntilDone:YES];
 	return;
 	}
 
@@ -288,28 +274,27 @@ if ([NSThread isMainThread] == NO)
 	NSMutableArray *theRemovedNotifications = [NSMutableArray array];
 	for (CUserNotificationState *theState in self.notificationStates)
 		{
-		if (theNow > theState.requestedHideDate)
+		if (theState.shown == YES && theNow >= theState.requestedHideDate)
 			{
 			[theRemovedNotifications addObject:theState];
 			}
 		}
+
 	for (CUserNotificationState *theState in theRemovedNotifications)
 		{
 		[self hideNotificationInternal:theState];
 		}
+
 	CUserNotificationState *theNewState = self.nextNotificationState;
 	if (theNewState)
 		{
-		if (theNow > theNewState.requestedHideDate)
-			{
-			[self.notificationStates removeObject:theNewState];
-			}
-		else
+		if (theNow > theNewState.requestedShowDate)
 			{
 			[self showNotificationInternal:theNewState];
 			}
 		}
 	}
+
 [self nextTimer];
 }
 
@@ -317,7 +302,7 @@ if ([NSThread isMainThread] == NO)
 {
 @synchronized(self)
 	{
-	CFAbsoluteTime theCurrentTime = CFAbsoluteTimeGetCurrent();
+//	CFAbsoluteTime theCurrentTime = CFAbsoluteTimeGetCurrent();
 
 	if (self.notificationStates.count == 0)
 		return;
@@ -325,26 +310,24 @@ if ([NSThread isMainThread] == NO)
 	CFAbsoluteTime theNextTime = FLT_MAX;
 	for (CUserNotificationState *theState in self.notificationStates)
 		{
-		if (theState.showDate >= theCurrentTime && theState.showDate < theNextTime)
-			theNextTime = theState.showDate;
-		if (theState.requestedHideDate >= theCurrentTime && theState.requestedHideDate < theNextTime)
-			theNextTime = theState.requestedHideDate;
+		if (theState.shown == NO && isnormal(theState.requestedShowDate))
+			theNextTime = MIN(theNextTime, theState.requestedShowDate);
+		if (isnormal(theState.requestedHideDate) && theState.requestedHideDate)
+			theNextTime = MIN(theNextTime, theState.requestedHideDate);
 		}
 
 	if (theNextTime == FLT_MAX)
+        {
 		return;
+        }
 
-	if (self.timer == NULL || theNextTime > [self.timer.fireDate timeIntervalSinceReferenceDate])
-		{
-		if (self.timer)
-			{
-			[self.timer invalidate];
-			}
-		self.timer = [[[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceReferenceDate:theNextTime] interval:0 target:self selector:@selector(timer:) userInfo:NULL repeats:NO] autorelease];
-//		NSLog(@"Scheduling timer: %@ (fires in %g seconds)", self.timer, [[NSDate dateWithTimeIntervalSinceReferenceDate:theNextTime] timeIntervalSinceNow]);
+    if (self.timer)
+        {
+        [self.timer invalidate];
+        }
+    self.timer = [[[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceReferenceDate:theNextTime] interval:0 target:self selector:@selector(timer:) userInfo:NULL repeats:NO] autorelease];
 
-		[[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
-		}
+    [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
 	}
 }
 
@@ -352,7 +335,6 @@ if ([NSThread isMainThread] == NO)
 
 - (void)showNotificationInternal:(CUserNotificationState *)inState
 {
-//NSLog(@"* SHOWING NOTIFICATION");
 @synchronized(self)
 	{
 	const CFAbsoluteTime theNow = CFAbsoluteTimeGetCurrent();
@@ -388,8 +370,6 @@ if ([NSThread isMainThread] == NO)
 
 	[self.notificationStates removeObject:inState];
 	}
-
-[self.notificationStates removeObject:inState];
 }
 
 #pragma mark -

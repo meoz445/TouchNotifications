@@ -48,7 +48,7 @@ if ((self = [super init]) != NULL)
 	created = CFAbsoluteTimeGetCurrent();
 	requestedShowDate = NAN;
 	showDate = NAN;
-	requestedHideDate = FLT_MAX;
+	requestedHideDate = NAN;
 	hideDate = NAN;
 	}
 return(self);
@@ -66,13 +66,13 @@ style = NULL;
 
 - (NSString *)description
 {
-return([NSString stringWithFormat:@"%@ (created: %f, req. show date: %f, show date: %f, requested hide date: %f, hide date: %f, notification: %@)",
+return([NSString stringWithFormat:@"%@ (created: %@, req. show date: +%f, show date: +%f, requested hide date: +%f, hide date: +%f, notification: %@)",
 	[super description],
-	self.created,
+	[NSDate dateWithTimeIntervalSinceReferenceDate:self.created],
 	self.requestedShowDate - self.created,
-	isnan(self.showDate) ? NAN : self.showDate - self.created,
-	isnan(self.requestedHideDate) ? NAN : self.requestedHideDate - self.created,
-	isnan(self.hideDate) ? NAN : self.hideDate - self.created,
+	isnan(self.showDate) ? 0.0 : self.showDate - self.created,
+	isnan(self.requestedHideDate) ? 0.0 : self.requestedHideDate - self.created,
+	isnan(self.hideDate) ? 0.0 : self.hideDate - self.created,
 	self.notification
 	]);
 }
