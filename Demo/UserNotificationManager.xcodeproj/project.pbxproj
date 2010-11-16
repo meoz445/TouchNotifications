@@ -129,6 +129,7 @@
 		54AEC428129227F50005F0D2 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54AEC427129227F50005F0D2 /* MessageUI.framework */; };
 		54AEC434129228090005F0D2 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54AEC433129228090005F0D2 /* QuartzCore.framework */; };
 		54AEC43A129228380005F0D2 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 54AEC439129228380005F0D2 /* CoreData.framework */; };
+		54AEC848129261910005F0D2 /* CTopBubbleUserNotificationStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = 54AEC847129261910005F0D2 /* CTopBubbleUserNotificationStyle.m */; };
 		5C0F5F5B113C84DE00345FEE /* CTopBadgeUserNotificationStyle.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C0F5F5A113C84DE00345FEE /* CTopBadgeUserNotificationStyle.m */; };
 /* End PBXBuildFile section */
 
@@ -354,6 +355,8 @@
 		54AEC427129227F50005F0D2 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		54AEC433129228090005F0D2 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		54AEC439129228380005F0D2 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		54AEC846129261910005F0D2 /* CTopBubbleUserNotificationStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTopBubbleUserNotificationStyle.h; sourceTree = "<group>"; };
+		54AEC847129261910005F0D2 /* CTopBubbleUserNotificationStyle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTopBubbleUserNotificationStyle.m; sourceTree = "<group>"; };
 		5C0F5F59113C84DE00345FEE /* CTopBadgeUserNotificationStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTopBadgeUserNotificationStyle.h; sourceTree = "<group>"; };
 		5C0F5F5A113C84DE00345FEE /* CTopBadgeUserNotificationStyle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CTopBadgeUserNotificationStyle.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -501,6 +504,8 @@
 				453C31AE10B1A5F700C4DA32 /* CHUDView.m */,
 				5C0F5F59113C84DE00345FEE /* CTopBadgeUserNotificationStyle.h */,
 				5C0F5F5A113C84DE00345FEE /* CTopBadgeUserNotificationStyle.m */,
+				54AEC846129261910005F0D2 /* CTopBubbleUserNotificationStyle.h */,
+				54AEC847129261910005F0D2 /* CTopBubbleUserNotificationStyle.m */,
 			);
 			path = Styles;
 			sourceTree = "<group>";
@@ -1030,6 +1035,7 @@
 				54AEC41C129227B90005F0D2 /* CFloatTransformer.m in Sources */,
 				54AEC41D129227B90005F0D2 /* CHumanDateFormatter.m in Sources */,
 				54AEC41E129227B90005F0D2 /* CNumberToStringValueTransformer.m in Sources */,
+				54AEC848129261910005F0D2 /* CTopBubbleUserNotificationStyle.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

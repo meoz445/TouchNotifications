@@ -46,6 +46,10 @@
 return(YES);
 }
 
+-(void)viewDidLoad {
+	[super viewDidLoad];
+}
+
 - (CUserNotification *)notification
 {
 CUserNotification *theNotification = [[[CUserNotification alloc] init] autorelease];
