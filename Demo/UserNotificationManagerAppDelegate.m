@@ -45,7 +45,10 @@
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
+window.rootViewController = tabBarController;
 [window addSubview:tabBarController.view];
+[window makeKeyAndVisible];
+
 }
 
 @end
