@@ -1,6 +1,0 @@
-[submodule "External/TouchUI"]
-	path = External/TouchUI
-	url = https://github.com/TouchCode/TouchUI.git
-[submodule "External/TouchFoundation"]
-	path = External/TouchFoundation
-	url = https://github.com/TouchCode/TouchFoundation.git
